@@ -71,7 +71,7 @@ def send_receipt_email(
         f"Veuillez trouver ci-joint votre quittance de loyer pour le mois "
         f"de {month_description} {year}.\n\n"
         f"Cordialement,\n"
-        f"Christian Felipe VALENCIA BAQUERO"
+        f"Felipe VALENCIA"
     )
 
     message = MIMEMultipart()
