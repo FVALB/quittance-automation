@@ -15,6 +15,7 @@ Usage:
 import logging
 from pathlib import Path
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -52,8 +53,13 @@ def get_credentials() -> Credentials:
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             logger.info("OAuth token expired — refreshing automatically.")
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+            except RefreshError:
+                logger.warning("Token refresh failed (revoked) — restarting browser OAuth flow.")
+                creds = None
+
+        if not creds:
             logger.info("No valid token found — starting browser OAuth flow.")
             flow = InstalledAppFlow.from_client_secrets_file(
                 str(client_secret_path), config.SCOPES
