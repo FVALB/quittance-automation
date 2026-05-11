@@ -14,6 +14,7 @@ Exit codes:
 import argparse
 import logging
 import sys
+from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
@@ -67,7 +68,16 @@ def main() -> int:
         print(f"[FATAL] Configuration error: {exc}", file=sys.stderr)
         return 1
 
-    _setup_logging(config.LOG_FILE, config.LOG_LEVEL)
+    try:
+        _setup_logging(config.LOG_FILE, config.LOG_LEVEL)
+    except Exception as exc:
+        fallback = config.LOG_FILE.parent / "bootstrap_error.log"
+        fallback.parent.mkdir(parents=True, exist_ok=True)
+        fallback.write_text(
+            f"{datetime.now().isoformat()} FATAL: _setup_logging failed: {exc}\n",
+            encoding="utf-8",
+        )
+        return 1
     logger = logging.getLogger(__name__)
 
     try:
